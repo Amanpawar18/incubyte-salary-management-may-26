@@ -196,6 +196,33 @@ def test_update_employee_returns_422_when_email_invalid(client):
     assert res.status_code == 422
 
 
+# ── DELETE /api/employees/{id} ───────────────────────────────────────────────
+
+def test_delete_employee_returns_204(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.delete(f"/api/employees/{created['id']}")
+    assert res.status_code == 204
+
+
+def test_delete_employee_removes_employee_from_list(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    client.delete(f"/api/employees/{created['id']}")
+    res = client.get("/api/employees")
+    assert res.json()["data"]["total"] == 0
+
+
+def test_delete_employee_returns_404_when_not_found(client):
+    res = client.delete("/api/employees/9999")
+    assert res.status_code == 404
+
+
+def test_delete_employee_makes_id_unreachable(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    client.delete(f"/api/employees/{created['id']}")
+    res = client.get(f"/api/employees/{created['id']}")
+    assert res.status_code == 404
+
+
 def test_update_employee_returns_200_with_all_updated_fields(client):
     created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
     updated_payload = {
