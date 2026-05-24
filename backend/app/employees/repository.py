@@ -18,6 +18,9 @@ class EmployeeRepository:
     def get_by_email(self, email: str) -> Employee | None:
         return self.session.exec(select(Employee).where(Employee.email == email)).first()
 
+    def get_by_id(self, employee_id: int) -> Employee | None:
+        return self.session.get(Employee, employee_id)
+
     def get_paginated(
         self,
         page: int,

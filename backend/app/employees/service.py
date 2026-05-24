@@ -14,6 +14,12 @@ class EmployeeService:
         employee = self.repo.create(data)
         return EmployeeRead.model_validate(employee)
 
+    def get_by_id(self, employee_id: int) -> EmployeeRead:
+        employee = self.repo.get_by_id(employee_id)
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        return EmployeeRead.model_validate(employee)
+
     def list_paginated(
         self,
         page: int,
