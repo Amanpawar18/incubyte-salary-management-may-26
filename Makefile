@@ -1,4 +1,4 @@
-.PHONY: install dev test lint be-dev fe-dev be-test fe-test be-lint fe-typecheck
+.PHONY: install dev test lint be-dev fe-dev be-test fe-test be-lint fe-typecheck seed
 
 install:
 	cd backend && uv sync --all-groups
@@ -28,3 +28,6 @@ fe-typecheck:
 	cd frontend && pnpm exec tsc --noEmit
 
 lint: be-lint fe-typecheck
+
+seed:
+	cd backend && uv run python seed.py
