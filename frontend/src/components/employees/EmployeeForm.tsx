@@ -1,6 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,31 +39,39 @@ export function EmployeeForm({ open, onClose, onSubmit }: Props) {
     resolver: zodResolver(schema),
   })
 
-  if (!open) return null
-
   function handleClose() {
     reset()
     onClose()
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h2 className="text-lg font-semibold">Add Employee</h2>
-      <form onSubmit={handleSubmit((data) => onSubmit(data))} className="grid grid-cols-2 gap-4" noValidate>
-        {FIELDS.map(({ name, label, type }) => (
-          <div key={name} className="flex flex-col gap-1">
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} type={type} {...register(name)} />
-            {errors[name] && (
-              <p className="text-xs text-red-500">{errors[name]?.message}</p>
-            )}
-          </div>
-        ))}
-        <div className="col-span-2 flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Save</Button>
-        </div>
-      </form>
-    </div>
+    <Sheet open={open} onOpenChange={(o) => !o && handleClose()}>
+      <SheetContent className="sm:max-w-md" showCloseButton={false}>
+        <SheetHeader>
+          <SheetTitle>Add Employee</SheetTitle>
+        </SheetHeader>
+
+        <form
+          onSubmit={handleSubmit((data) => onSubmit(data))}
+          className="flex flex-col gap-4 px-4 py-6"
+          noValidate
+        >
+          {FIELDS.map(({ name, label, type }) => (
+            <div key={name} className="flex flex-col gap-1.5">
+              <Label htmlFor={name}>{label}</Label>
+              <Input id={name} type={type} {...register(name)} />
+              {errors[name] && (
+                <p className="text-xs text-destructive">{errors[name]?.message}</p>
+              )}
+            </div>
+          ))}
+
+          <SheetFooter className="mt-2 flex-row justify-end gap-2 px-0">
+            <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+            <Button type="submit">Save</Button>
+          </SheetFooter>
+        </form>
+      </SheetContent>
+    </Sheet>
   )
 }
