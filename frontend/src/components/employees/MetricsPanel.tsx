@@ -1,7 +1,9 @@
+import { Skeleton } from '@/components/ui/skeleton'
 import type { SalaryMetrics } from '@/lib/api'
 
 interface Props {
   metrics: SalaryMetrics
+  loading?: boolean
 }
 
 function fmt(value: number | null): string {
@@ -9,7 +11,34 @@ function fmt(value: number | null): string {
   return `$${value.toLocaleString('en-US')}`
 }
 
-export function MetricsPanel({ metrics }: Props) {
+export function MetricsPanel({ metrics, loading }: Props) {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border bg-background px-4 py-3 shadow-sm space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-7 w-20" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl border bg-background shadow-sm">
+          <Skeleton className="h-8 m-3 w-32" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 mx-3 mb-2" />
+          ))}
+        </div>
+        <div className="rounded-xl border bg-background shadow-sm">
+          <Skeleton className="h-8 m-3 w-24" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 mx-3 mb-2" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">

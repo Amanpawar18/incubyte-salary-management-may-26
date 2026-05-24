@@ -2,6 +2,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Employee } from '@/lib/api'
 
 interface Props {
@@ -11,9 +12,50 @@ interface Props {
   pageSize: number
   onPageChange: (page: number) => void
   onView?: (id: number) => void
+  loading?: boolean
 }
 
-export function EmployeeTable({ items, total, page, pageSize, onPageChange, onView }: Props) {
+export function EmployeeTable({ items, total, page, pageSize, onPageChange, onView, loading }: Props) {
+  if (loading) {
+    return (
+      <div className="space-y-0">
+        <Table className="table-fixed">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[14%]">Name</TableHead>
+              <TableHead className="w-[18%]">Job Title</TableHead>
+              <TableHead className="w-[14%]">Department</TableHead>
+              <TableHead className="w-[12%]">Country</TableHead>
+              <TableHead className="w-[10%]">Salary</TableHead>
+              <TableHead className="w-[24%]">Email</TableHead>
+              <TableHead className="w-[8%]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                <TableCell><Skeleton className="h-7 w-12" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="flex items-center justify-between px-4 pb-4 pt-3 text-sm text-muted-foreground">
+          <Skeleton className="h-4 w-24" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-14" />
+            <Skeleton className="h-8 w-14" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const totalPages = Math.ceil(total / pageSize)
   const start = (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)

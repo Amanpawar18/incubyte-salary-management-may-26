@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { toast, Toaster } from 'sonner'
 import { EmployeeDetail } from '@/components/employees/EmployeeDetail'
 import { EmployeeForm } from '@/components/employees/EmployeeForm'
 import { EmployeeTable } from '@/components/employees/EmployeeTable'
@@ -19,6 +20,8 @@ export default function App() {
   const [country, setCountry] = useState('')
   const [data, setData] = useState<EmployeePage>({ items: [], total: 0, page: 1, page_size: 20 })
   const [metrics, setMetrics] = useState<SalaryMetrics>({ total: 0, average_salary: 0, min_salary: null, max_salary: null, by_department: [], by_country: [] })
+  const [loadingEmployees, setLoadingEmployees] = useState(true)
+  const [loadingMetrics, setLoadingMetrics] = useState(true)
 
   const fetchEmployees = useCallback(
     () => api.employees.list({ page, page_size: 20, name, country }),
@@ -26,8 +29,15 @@ export default function App() {
   )
 
   useEffect(() => {
-    fetchEmployees().then(res => setData(res.data))
-    api.employees.metrics().then(res => setMetrics(res.data))
+    fetchEmployees()
+      .then(res => setData(res.data))
+      .catch(() => toast.error('Failed to load employees'))
+      .finally(() => setLoadingEmployees(false))
+
+    api.employees.metrics()
+      .then(res => setMetrics(res.data))
+      .catch(() => toast.error('Failed to load metrics'))
+      .finally(() => setLoadingMetrics(false))
   }, [fetchEmployees])
 
   async function handleView(id: number) {
@@ -48,16 +58,26 @@ export default function App() {
   }
 
   async function handleCreate(payload: Parameters<typeof api.employees.create>[0]) {
-    await api.employees.create(payload)
-    setFormOpen(false)
-    refreshAll()
+    try {
+      await api.employees.create(payload)
+      setFormOpen(false)
+      refreshAll()
+      toast.success('Employee created')
+    } catch {
+      toast.error('Failed to create employee')
+    }
   }
 
   async function handleDelete(id: number) {
-    await api.employees.delete(id)
-    setDetailOpen(false)
-    setSelectedEmployee(null)
-    refreshAll()
+    try {
+      await api.employees.delete(id)
+      setDetailOpen(false)
+      setSelectedEmployee(null)
+      refreshAll()
+      toast.success('Employee deleted')
+    } catch {
+      toast.error('Failed to delete employee')
+    }
   }
 
   function handleEditClick(employee: Employee) {
@@ -68,10 +88,15 @@ export default function App() {
 
   async function handleUpdate(payload: Parameters<typeof api.employees.create>[0]) {
     if (!editingEmployee) return
-    await api.employees.update(editingEmployee.id, payload)
-    setFormOpen(false)
-    setEditingEmployee(null)
-    refreshAll()
+    try {
+      await api.employees.update(editingEmployee.id, payload)
+      setFormOpen(false)
+      setEditingEmployee(null)
+      refreshAll()
+      toast.success('Employee updated')
+    } catch {
+      toast.error('Failed to update employee')
+    }
   }
 
   return (
@@ -84,7 +109,7 @@ export default function App() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/* Left — 30% metrics */}
           <aside className="w-full lg:w-[30%] lg:shrink-0">
-            <MetricsPanel metrics={metrics} />
+            <MetricsPanel metrics={metrics} loading={loadingMetrics} />
           </aside>
 
           {/* Right — 70% employee CRUD */}
@@ -120,6 +145,7 @@ export default function App() {
                 pageSize={data.page_size}
                 onPageChange={setPage}
                 onView={handleView}
+                loading={loadingEmployees}
               />
             </div>
           </section>
@@ -132,6 +158,8 @@ export default function App() {
         onClose={() => { setFormOpen(false); setEditingEmployee(null) }}
         onSubmit={editingEmployee ? handleUpdate : handleCreate}
       />
+
+      <Toaster richColors position="top-right" />
 
       <EmployeeDetail
         employee={selectedEmployee}
