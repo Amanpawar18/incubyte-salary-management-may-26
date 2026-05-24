@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { EmployeeDetail } from '../components/employees/EmployeeDetail'
 import type { Employee } from '../lib/api'
 
@@ -16,15 +16,37 @@ const employee: Employee = {
 }
 
 describe('EmployeeDetail', () => {
-  it('shows employee details when open', () => {
+  it('shows all employee fields when open', () => {
     render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} />)
     expect(screen.getByText('Alice Smith')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
+    expect(screen.getByText('Engineering')).toBeInTheDocument()
+    expect(screen.getByText('India')).toBeInTheDocument()
     expect(screen.getByText('alice@company.com')).toBeInTheDocument()
+    expect(screen.getByText('$80,000')).toBeInTheDocument()
   })
 
   it('does not show details when closed', () => {
     render(<EmployeeDetail employee={employee} open={false} onClose={() => {}} />)
     expect(screen.queryByText('Alice Smith')).not.toBeInTheDocument()
+  })
+
+  it('does not show Edit button when onEdit is not provided', () => {
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} />)
+    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument()
+  })
+
+  it('calls onEdit with employee when Edit button is clicked', () => {
+    const onEdit = vi.fn()
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onEdit={onEdit} />)
+    fireEvent.click(screen.getByRole('button', { name: /edit/i }))
+    expect(onEdit).toHaveBeenCalledWith(employee)
+  })
+
+  it('calls onClose when sheet is dismissed', () => {
+    const onClose = vi.fn()
+    render(<EmployeeDetail employee={employee} open={true} onClose={onClose} />)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onClose).toHaveBeenCalled()
   })
 })
