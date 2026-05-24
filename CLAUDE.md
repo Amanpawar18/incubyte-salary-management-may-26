@@ -28,30 +28,34 @@ Only create files and directories when they are directly needed for the current 
 
 In the Green step, write only the code needed to make the current failing tests pass. Do not implement methods, routes, or logic that have no failing test yet — those belong in the next Red → Green cycle.
 
-## TDD Workflow
+## TDD Workflow — Full-Stack Cycle Per Feature
 
-Every feature follows strict Red → Green → Refactor:
+Each feature (e.g. "list employees", "create employee") goes through this exact sequence before moving to the next feature:
 
-1. **Red** — write the failing test, run it, confirm it fails for the right reason
-2. **Green** — write the **minimum** code to make **only the current failing tests** pass, run them, confirm green
-3. **Refactor** — clean up if needed, run tests again to confirm still green
+```
+1. BE Red    — write failing backend test(s), run, confirm they fail
+2. BE Green  — write minimal backend code to pass only those tests, run, confirm green
+3. FE Red    — write failing frontend test(s), run, confirm they fail
+4. FE Green  — implement frontend component + wire to backend API, run, confirm green
+5. Smoke     — start both servers, hit the endpoint manually in the browser
+```
 
-The user commits manually after each Red step and each Green step. **Never auto-commit.**
+The user commits manually after each Red and each Green step. **Never auto-commit.**
 
 ### TDD Rules (critical — never break these)
 
-- **One cycle at a time.** Each Red step introduces tests for one operation (e.g. POST). The Green step implements only that operation. The next Red step introduces the next operation (e.g. GET, PUT, DELETE). Never combine multiple cycles.
-- **Green means minimal.** Ask before writing any method, route, or class: "Is there a currently failing test that requires this?" If not, do not write it.
-- **Never write implementation ahead of the test.** No method exists until its Red test exists first.
-- **Never write tests ahead of their task.** Only write the tests for the current task — not future tasks.
+- **One feature at a time.** Complete all 5 steps for one feature before starting the next.
+- **Green means minimal.** Only write code that makes the current failing tests pass. Ask: "Is there a failing test that requires this?" If not — do not write it.
+- **Never write implementation ahead of the test.** No method, route, or component exists until its Red test exists first.
+- **Never write tests for future features.** Only write tests for the current feature.
 
 ### What "minimal" means in practice
 
 | Current failing tests | What to implement | What NOT to implement |
 |---|---|---|
-| POST /api/employees (8 tests) | `create` method + POST route | GET, PUT, DELETE routes or methods |
-| GET /api/employees (5 tests) | `list_paginated` + GET route | PUT, DELETE routes |
-| GET /api/employees/{id} | `get_by_id` + GET /{id} route | anything else |
+| POST /api/employees | `create` + POST route only | GET, PUT, DELETE routes |
+| GET /api/employees | `list_paginated` + GET route only | GET /{id}, PUT, DELETE |
+| GET /api/employees/{id} | `get_by_id` + GET /{id} route only | PUT, DELETE |
 
 ## Commit Rules
 
