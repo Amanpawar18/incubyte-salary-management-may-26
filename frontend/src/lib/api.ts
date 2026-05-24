@@ -50,6 +50,8 @@ export const api = {
       )
       return request<{ data: EmployeePage }>(`/api/employees?${query}`)
     },
+    get: (id: number) =>
+      request<{ data: Employee }>(`/api/employees/${id}`),
     create: (data: EmployeeFormData) =>
       request<{ data: Employee }>('/api/employees', {
         method: 'POST',

@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
+import { EmployeeDetail } from '@/components/employees/EmployeeDetail'
 import { EmployeeForm } from '@/components/employees/EmployeeForm'
 import { EmployeeTable } from '@/components/employees/EmployeeTable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { api, type EmployeePage } from '@/lib/api'
+import { api, type Employee, type EmployeePage } from '@/lib/api'
 
 export default function App() {
   const [formOpen, setFormOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [page, setPage] = useState(1)
   const [nameInput, setNameInput] = useState('')
   const [countryInput, setCountryInput] = useState('')
@@ -14,12 +17,20 @@ export default function App() {
   const [country, setCountry] = useState('')
   const [data, setData] = useState<EmployeePage>({ items: [], total: 0, page: 1, page_size: 20 })
 
-  const fetchEmployees = useCallback(async () => {
-    const res = await api.employees.list({ page, page_size: 20, name, country })
-    setData(res.data)
-  }, [page, name, country])
+  const fetchEmployees = useCallback(
+    () => api.employees.list({ page, page_size: 20, name, country }),
+    [page, name, country]
+  )
 
-  useEffect(() => { fetchEmployees() }, [fetchEmployees])
+  useEffect(() => {
+    fetchEmployees().then(res => setData(res.data))
+  }, [fetchEmployees])
+
+  async function handleView(id: number) {
+    const res = await api.employees.get(id)
+    setSelectedEmployee(res.data)
+    setDetailOpen(true)
+  }
 
   function handleSearch() {
     setName(nameInput)
@@ -30,7 +41,7 @@ export default function App() {
   async function handleCreate(payload: Parameters<typeof api.employees.create>[0]) {
     await api.employees.create(payload)
     setFormOpen(false)
-    fetchEmployees()
+    fetchEmployees().then(res => setData(res.data))
   }
 
   return (
@@ -70,6 +81,7 @@ export default function App() {
             page={page}
             pageSize={data.page_size}
             onPageChange={setPage}
+            onView={handleView}
           />
         </div>
       </main>
@@ -78,6 +90,12 @@ export default function App() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSubmit={handleCreate}
+      />
+
+      <EmployeeDetail
+        employee={selectedEmployee}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
       />
     </div>
   )

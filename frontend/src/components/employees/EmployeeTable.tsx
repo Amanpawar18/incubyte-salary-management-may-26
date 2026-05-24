@@ -10,9 +10,10 @@ interface Props {
   page: number
   pageSize: number
   onPageChange: (page: number) => void
+  onView?: (id: number) => void
 }
 
-export function EmployeeTable({ items, total, page, pageSize, onPageChange }: Props) {
+export function EmployeeTable({ items, total, page, pageSize, onPageChange, onView }: Props) {
   const totalPages = Math.ceil(total / pageSize)
   const start = (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
@@ -34,6 +35,7 @@ export function EmployeeTable({ items, total, page, pageSize, onPageChange }: Pr
             <TableHead>Country</TableHead>
             <TableHead>Salary</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,6 +47,13 @@ export function EmployeeTable({ items, total, page, pageSize, onPageChange }: Pr
               <TableCell>{emp.country}</TableCell>
               <TableCell>${emp.salary.toLocaleString()}</TableCell>
               <TableCell>{emp.email}</TableCell>
+              <TableCell>
+                {onView && (
+                  <Button variant="outline" size="sm" onClick={() => onView(emp.id)}>
+                    View
+                  </Button>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
