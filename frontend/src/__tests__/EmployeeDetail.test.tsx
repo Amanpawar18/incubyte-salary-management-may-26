@@ -49,4 +49,21 @@ describe('EmployeeDetail', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('shows Delete button when onDelete is provided', () => {
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onDelete={() => {}} />)
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
+  })
+
+  it('does not show Delete button when onDelete is not provided', () => {
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} />)
+    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
+  })
+
+  it('calls onDelete with employee id when Delete is clicked', () => {
+    const onDelete = vi.fn()
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onDelete={onDelete} />)
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    expect(onDelete).toHaveBeenCalledWith(employee.id)
+  })
 })
