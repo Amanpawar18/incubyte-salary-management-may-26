@@ -67,4 +67,24 @@ describe('EmployeeTable', () => {
     )
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
   })
+
+  it('renders a View button for each employee row', () => {
+    const employees = [
+      makeEmployee({ id: 1, full_name: 'Alice Smith' }),
+      makeEmployee({ id: 2, full_name: 'Bob Jones', email: 'bob@company.com' }),
+    ]
+    render(
+      <EmployeeTable items={employees} total={2} page={1} pageSize={20} onPageChange={noop} onView={noop} />
+    )
+    expect(screen.getAllByRole('button', { name: /view/i })).toHaveLength(2)
+  })
+
+  it('calls onView with employee id when View is clicked', () => {
+    const onView = vi.fn()
+    render(
+      <EmployeeTable items={[makeEmployee({ id: 42 })]} total={1} page={1} pageSize={20} onPageChange={noop} onView={onView} />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /view/i }))
+    expect(onView).toHaveBeenCalledWith(42)
+  })
 })
