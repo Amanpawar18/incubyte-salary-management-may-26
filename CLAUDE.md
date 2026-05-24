@@ -20,6 +20,10 @@ incubyte-salary-management/
 └── CLAUDE.md
 ```
 
+## File Creation Rule
+
+Only create files and directories when they are directly needed for the current TDD step. Never pre-scaffold future directories or stub files before their task begins.
+
 ## TDD Workflow
 
 Every feature follows strict Red → Green → Refactor:
