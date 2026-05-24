@@ -24,15 +24,34 @@ incubyte-salary-management/
 
 Only create files and directories when they are directly needed for the current TDD step. Never pre-scaffold future directories or stub files before their task begins.
 
+## Minimal Green Rule
+
+In the Green step, write only the code needed to make the current failing tests pass. Do not implement methods, routes, or logic that have no failing test yet — those belong in the next Red → Green cycle.
+
 ## TDD Workflow
 
 Every feature follows strict Red → Green → Refactor:
 
 1. **Red** — write the failing test, run it, confirm it fails for the right reason
-2. **Green** — write minimal code to make the test pass, run it, confirm it passes
+2. **Green** — write the **minimum** code to make **only the current failing tests** pass, run them, confirm green
 3. **Refactor** — clean up if needed, run tests again to confirm still green
 
 The user commits manually after each Red step and each Green step. **Never auto-commit.**
+
+### TDD Rules (critical — never break these)
+
+- **One cycle at a time.** Each Red step introduces tests for one operation (e.g. POST). The Green step implements only that operation. The next Red step introduces the next operation (e.g. GET, PUT, DELETE). Never combine multiple cycles.
+- **Green means minimal.** Ask before writing any method, route, or class: "Is there a currently failing test that requires this?" If not, do not write it.
+- **Never write implementation ahead of the test.** No method exists until its Red test exists first.
+- **Never write tests ahead of their task.** Only write the tests for the current task — not future tasks.
+
+### What "minimal" means in practice
+
+| Current failing tests | What to implement | What NOT to implement |
+|---|---|---|
+| POST /api/employees (8 tests) | `create` method + POST route | GET, PUT, DELETE routes or methods |
+| GET /api/employees (5 tests) | `list_paginated` + GET route | PUT, DELETE routes |
+| GET /api/employees/{id} | `get_by_id` + GET /{id} route | anything else |
 
 ## Commit Rules
 

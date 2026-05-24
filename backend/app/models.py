@@ -1,6 +1,10 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlmodel import Field, SQLModel
+
+
+def utcnow() -> datetime:
+    return datetime.now(UTC)
 
 
 class Employee(SQLModel, table=True):
@@ -11,5 +15,5 @@ class Employee(SQLModel, table=True):
     country: str = Field(index=True)
     salary: float
     email: str = Field(unique=True, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
