@@ -100,3 +100,19 @@ def test_list_employees_filter_by_country(client):
 
     res = client.get("/api/employees?country=India")
     assert res.json()["data"]["total"] == 1
+
+
+# ── GET /api/employees/{id} ───────────────────────────────────────────────────
+
+def test_get_employee_by_id_returns_200(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.get(f"/api/employees/{created['id']}")
+    assert res.status_code == 200
+    body = res.json()["data"]
+    assert body["id"] == created["id"]
+    assert body["full_name"] == "Alice Smith"
+
+
+def test_get_employee_by_id_returns_404_when_not_found(client):
+    res = client.get("/api/employees/9999")
+    assert res.status_code == 404
