@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { Employee } from '@/lib/api'
 
 const schema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
@@ -17,15 +18,17 @@ const schema = z.object({
   salary: z.coerce.number().positive('Salary must be greater than 0'),
 })
 
-type EmployeeFormData = z.infer<typeof schema>
+type EmployeeFormInput = z.input<typeof schema>   // salary: unknown (raw field value)
+type EmployeeFormData = z.output<typeof schema>   // salary: number (after coercion)
 
 interface Props {
   open: boolean
   onClose: () => void
   onSubmit: (data: EmployeeFormData) => void
+  employee?: Employee
 }
 
-const FIELDS: { name: keyof EmployeeFormData; label: string; type: string }[] = [
+const FIELDS: { name: keyof EmployeeFormInput; label: string; type: string }[] = [
   { name: 'full_name', label: 'Full Name', type: 'text' },
   { name: 'email', label: 'Email', type: 'email' },
   { name: 'job_title', label: 'Job Title', type: 'text' },
@@ -34,9 +37,12 @@ const FIELDS: { name: keyof EmployeeFormData; label: string; type: string }[] = 
   { name: 'salary', label: 'Salary', type: 'number' },
 ]
 
-export function EmployeeForm({ open, onClose, onSubmit }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<EmployeeFormData>({
+export function EmployeeForm({ open, onClose, onSubmit, employee }: Props) {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<EmployeeFormInput, unknown, EmployeeFormData>({
     resolver: zodResolver(schema),
+    values: employee
+      ? { full_name: employee.full_name, email: employee.email, job_title: employee.job_title, department: employee.department, country: employee.country, salary: employee.salary }
+      : undefined,
   })
 
   function handleClose() {
@@ -48,7 +54,7 @@ export function EmployeeForm({ open, onClose, onSubmit }: Props) {
     <Sheet open={open} onOpenChange={(o) => !o && handleClose()}>
       <SheetContent className="sm:max-w-md" showCloseButton={false}>
         <SheetHeader>
-          <SheetTitle>Add Employee</SheetTitle>
+          <SheetTitle>{employee ? 'Edit Employee' : 'Add Employee'}</SheetTitle>
         </SheetHeader>
 
         <form

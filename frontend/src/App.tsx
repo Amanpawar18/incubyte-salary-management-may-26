@@ -8,6 +8,7 @@ import { api, type Employee, type EmployeePage } from '@/lib/api'
 
 export default function App() {
   const [formOpen, setFormOpen] = useState(false)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [page, setPage] = useState(1)
@@ -41,6 +42,20 @@ export default function App() {
   async function handleCreate(payload: Parameters<typeof api.employees.create>[0]) {
     await api.employees.create(payload)
     setFormOpen(false)
+    fetchEmployees().then(res => setData(res.data))
+  }
+
+  function handleEditClick(employee: Employee) {
+    setDetailOpen(false)
+    setEditingEmployee(employee)
+    setFormOpen(true)
+  }
+
+  async function handleUpdate(payload: Parameters<typeof api.employees.create>[0]) {
+    if (!editingEmployee) return
+    await api.employees.update(editingEmployee.id, payload)
+    setFormOpen(false)
+    setEditingEmployee(null)
     fetchEmployees().then(res => setData(res.data))
   }
 
@@ -88,14 +103,16 @@ export default function App() {
 
       <EmployeeForm
         open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSubmit={handleCreate}
+        employee={editingEmployee ?? undefined}
+        onClose={() => { setFormOpen(false); setEditingEmployee(null) }}
+        onSubmit={editingEmployee ? handleUpdate : handleCreate}
       />
 
       <EmployeeDetail
         employee={selectedEmployee}
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
+        onEdit={handleEditClick}
       />
     </div>
   )

@@ -52,6 +52,11 @@ export const api = {
     },
     get: (id: number) =>
       request<{ data: Employee }>(`/api/employees/${id}`),
+    update: (id: number, data: EmployeeFormData) =>
+      request<{ data: Employee }>(`/api/employees/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     create: (data: EmployeeFormData) =>
       request<{ data: Employee }>('/api/employees', {
         method: 'POST',
