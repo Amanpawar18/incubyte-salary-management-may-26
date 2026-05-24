@@ -24,6 +24,11 @@ def get_employee(employee_id: int, service: EmployeeService = Depends(get_servic
     return {"data": service.get_by_id(employee_id).model_dump()}
 
 
+@router.put("/{employee_id}")
+def update_employee(employee_id: int, data: EmployeeCreate, service: EmployeeService = Depends(get_service)):
+    return {"data": service.update(employee_id, data).model_dump()}
+
+
 @router.get("")
 def list_employees(
     page: int = Query(1, ge=1),

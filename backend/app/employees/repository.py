@@ -21,6 +21,14 @@ class EmployeeRepository:
     def get_by_id(self, employee_id: int) -> Employee | None:
         return self.session.get(Employee, employee_id)
 
+    def update(self, employee: Employee, data: EmployeeCreate) -> Employee:
+        for field, value in data.model_dump().items():
+            setattr(employee, field, value)
+        self.session.add(employee)
+        self.session.commit()
+        self.session.refresh(employee)
+        return employee
+
     def get_paginated(
         self,
         page: int,

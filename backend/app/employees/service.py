@@ -20,6 +20,15 @@ class EmployeeService:
             raise HTTPException(status_code=404, detail="Employee not found")
         return EmployeeRead.model_validate(employee)
 
+    def update(self, employee_id: int, data: EmployeeCreate) -> EmployeeRead:
+        employee = self.repo.get_by_id(employee_id)
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        existing = self.repo.get_by_email(data.email)
+        if existing and existing.id != employee_id:
+            raise HTTPException(status_code=409, detail="An employee with this email already exists")
+        return EmployeeRead.model_validate(self.repo.update(employee, data))
+
     def list_paginated(
         self,
         page: int,
