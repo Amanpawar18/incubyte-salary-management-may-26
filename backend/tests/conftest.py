@@ -27,3 +27,4 @@ def client_fixture():
         yield c
 
     SQLModel.metadata.drop_all(engine)
+    engine.dispose()
