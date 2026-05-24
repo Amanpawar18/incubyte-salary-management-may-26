@@ -1,6 +1,6 @@
 from sqlmodel import Session, col, func, select
 
-from app.employees.schemas import EmployeeCreate
+from app.employees.schemas import CountryMetrics, DepartmentMetrics, EmployeeCreate, SalaryMetrics
 from app.models import Employee
 
 
@@ -32,6 +32,33 @@ class EmployeeRepository:
         self.session.commit()
         self.session.refresh(employee)
         return employee
+
+    def get_metrics(self) -> SalaryMetrics:
+        total = self.session.exec(select(func.count()).select_from(Employee)).one()
+        avg = self.session.exec(select(func.avg(Employee.salary))).one()
+        min_sal = self.session.exec(select(func.min(Employee.salary))).one()
+        max_sal = self.session.exec(select(func.max(Employee.salary))).one()
+
+        by_dept = self.session.exec(
+            select(Employee.department, func.count(), func.avg(Employee.salary))
+            .group_by(Employee.department)
+            .order_by(Employee.department)
+        ).all()
+
+        by_country = self.session.exec(
+            select(Employee.country, func.count(), func.avg(Employee.salary))
+            .group_by(Employee.country)
+            .order_by(Employee.country)
+        ).all()
+
+        return SalaryMetrics(
+            total=total,
+            average_salary=round(avg, 2) if avg else 0,
+            min_salary=min_sal,
+            max_salary=max_sal,
+            by_department=[DepartmentMetrics(department=d, count=c, average_salary=round(a, 2)) for d, c, a in by_dept],
+            by_country=[CountryMetrics(country=c, count=n, average_salary=round(a, 2)) for c, n, a in by_country],
+        )
 
     def get_paginated(
         self,

@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from app.employees.repository import EmployeeRepository
-from app.employees.schemas import EmployeeCreate, EmployeePage, EmployeeRead
+from app.employees.schemas import EmployeeCreate, EmployeePage, EmployeeRead, SalaryMetrics
 
 
 class EmployeeService:
@@ -19,6 +19,9 @@ class EmployeeService:
         if not employee:
             raise HTTPException(status_code=404, detail="Employee not found")
         return EmployeeRead.model_validate(employee)
+
+    def get_metrics(self) -> SalaryMetrics:
+        return self.repo.get_metrics()
 
     def delete(self, employee_id: int) -> None:
         employee = self.repo.get_by_id(employee_id)

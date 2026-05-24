@@ -57,3 +57,24 @@ class EmployeePage(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class DepartmentMetrics(BaseModel):
+    department: str
+    count: int
+    average_salary: float
+
+
+class CountryMetrics(BaseModel):
+    country: str
+    count: int
+    average_salary: float
+
+
+class SalaryMetrics(BaseModel):
+    total: int
+    average_salary: float
+    min_salary: float | None
+    max_salary: float | None
+    by_department: list[DepartmentMetrics]
+    by_country: list[CountryMetrics]
