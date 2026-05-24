@@ -48,6 +48,33 @@ def test_create_employee_returns_422_when_required_field_missing(client):
     assert res.status_code == 422
 
 
+def test_create_employee_returns_422_when_job_title_blank(client):
+    res = client.post("/api/employees", json={**VALID_PAYLOAD, "job_title": "   "})
+    assert res.status_code == 422
+
+
+def test_create_employee_returns_422_when_department_blank(client):
+    res = client.post("/api/employees", json={**VALID_PAYLOAD, "department": ""})
+    assert res.status_code == 422
+
+
+def test_create_employee_returns_422_when_country_blank(client):
+    res = client.post("/api/employees", json={**VALID_PAYLOAD, "country": "   "})
+    assert res.status_code == 422
+
+
+def test_create_employee_returns_201_with_all_fields(client):
+    res = client.post("/api/employees", json=VALID_PAYLOAD)
+    assert res.status_code == 201
+    body = res.json()["data"]
+    assert body["job_title"] == VALID_PAYLOAD["job_title"]
+    assert body["department"] == VALID_PAYLOAD["department"]
+    assert body["country"] == VALID_PAYLOAD["country"]
+    assert body["email"] == VALID_PAYLOAD["email"]
+    assert "created_at" in body
+    assert "updated_at" in body
+
+
 def test_create_employee_returns_409_when_email_duplicate(client):
     client.post("/api/employees", json=VALID_PAYLOAD)
     res = client.post("/api/employees", json=VALID_PAYLOAD)
@@ -116,3 +143,75 @@ def test_get_employee_by_id_returns_200(client):
 def test_get_employee_by_id_returns_404_when_not_found(client):
     res = client.get("/api/employees/9999")
     assert res.status_code == 404
+
+
+# ── PUT /api/employees/{id} ───────────────────────────────────────────────────
+
+def test_update_employee_returns_200(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "salary": 95000})
+    assert res.status_code == 200
+    assert res.json()["data"]["salary"] == 95000
+
+
+def test_update_employee_returns_404_when_not_found(client):
+    res = client.put("/api/employees/9999", json=VALID_PAYLOAD)
+    assert res.status_code == 404
+
+
+def test_update_employee_returns_422_when_salary_invalid(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "salary": -500})
+    assert res.status_code == 422
+
+
+def test_update_employee_returns_409_when_email_taken(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)
+    other = client.post("/api/employees", json={**VALID_PAYLOAD, "email": "bob@company.com", "full_name": "Bob"}).json()["data"]
+    res = client.put(f"/api/employees/{other['id']}", json={**VALID_PAYLOAD, "email": VALID_PAYLOAD["email"]})
+    assert res.status_code == 409
+
+
+def test_update_employee_allows_keeping_own_email(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "salary": 90000})
+    assert res.status_code == 200
+
+
+def test_update_employee_returns_422_when_full_name_blank(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "full_name": "   "})
+    assert res.status_code == 422
+
+
+def test_update_employee_returns_422_when_salary_zero(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "salary": 0})
+    assert res.status_code == 422
+
+
+def test_update_employee_returns_422_when_email_invalid(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    res = client.put(f"/api/employees/{created['id']}", json={**VALID_PAYLOAD, "email": "bad-email"})
+    assert res.status_code == 422
+
+
+def test_update_employee_returns_200_with_all_updated_fields(client):
+    created = client.post("/api/employees", json=VALID_PAYLOAD).json()["data"]
+    updated_payload = {
+        "full_name": "Alice Updated",
+        "job_title": "Senior Engineer",
+        "department": "Platform",
+        "country": "Germany",
+        "salary": 120000,
+        "email": "alice.updated@company.com",
+    }
+    res = client.put(f"/api/employees/{created['id']}", json=updated_payload)
+    assert res.status_code == 200
+    body = res.json()["data"]
+    assert body["full_name"] == "Alice Updated"
+    assert body["job_title"] == "Senior Engineer"
+    assert body["department"] == "Platform"
+    assert body["country"] == "Germany"
+    assert body["salary"] == 120000
+    assert body["email"] == "alice.updated@company.com"
