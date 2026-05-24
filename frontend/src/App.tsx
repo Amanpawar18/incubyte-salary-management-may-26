@@ -45,6 +45,13 @@ export default function App() {
     fetchEmployees().then(res => setData(res.data))
   }
 
+  async function handleDelete(id: number) {
+    await api.employees.delete(id)
+    setDetailOpen(false)
+    setSelectedEmployee(null)
+    fetchEmployees().then(res => setData(res.data))
+  }
+
   function handleEditClick(employee: Employee) {
     setDetailOpen(false)
     setEditingEmployee(employee)
@@ -113,6 +120,7 @@ export default function App() {
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         onEdit={handleEditClick}
+        onDelete={handleDelete}
       />
     </div>
   )

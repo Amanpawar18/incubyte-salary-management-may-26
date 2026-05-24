@@ -60,10 +60,25 @@ describe('EmployeeDetail', () => {
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
   })
 
-  it('calls onDelete with employee id when Delete is clicked', () => {
+  it('shows confirmation dialog when Delete is clicked', () => {
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onDelete={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+  })
+
+  it('calls onDelete with employee id when deletion is confirmed', async () => {
     const onDelete = vi.fn()
     render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onDelete={onDelete} />)
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
     expect(onDelete).toHaveBeenCalledWith(employee.id)
+  })
+
+  it('does not call onDelete when deletion is cancelled', () => {
+    const onDelete = vi.fn()
+    render(<EmployeeDetail employee={employee} open={true} onClose={() => {}} onDelete={onDelete} />)
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+    expect(onDelete).not.toHaveBeenCalled()
   })
 })

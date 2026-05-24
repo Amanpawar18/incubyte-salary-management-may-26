@@ -37,6 +37,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
     const err = await res.json().catch(() => ({ detail: 'Request failed' }))
     throw new Error(err.detail ?? 'Request failed')
   }
+  if (res.status === 204) return undefined as T
   return res.json()
 }
 
@@ -52,6 +53,8 @@ export const api = {
     },
     get: (id: number) =>
       request<{ data: Employee }>(`/api/employees/${id}`),
+    delete: (id: number) =>
+      request<void>(`/api/employees/${id}`, { method: 'DELETE' }),
     update: (id: number, data: EmployeeFormData) =>
       request<{ data: Employee }>(`/api/employees/${id}`, {
         method: 'PUT',
