@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from app.employees.repository import EmployeeRepository
-from app.employees.schemas import EmployeeCreate, EmployeeRead
+from app.employees.schemas import EmployeeCreate, EmployeePage, EmployeeRead
 
 
 class EmployeeService:
@@ -13,3 +13,18 @@ class EmployeeService:
             raise HTTPException(status_code=409, detail="An employee with this email already exists")
         employee = self.repo.create(data)
         return EmployeeRead.model_validate(employee)
+
+    def list_paginated(
+        self,
+        page: int,
+        page_size: int,
+        name: str | None,
+        country: str | None,
+    ) -> EmployeePage:
+        items, total = self.repo.get_paginated(page, page_size, name, country)
+        return EmployeePage(
+            items=[EmployeeRead.model_validate(e) for e in items],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )

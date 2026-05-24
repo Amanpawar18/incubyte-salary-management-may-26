@@ -89,7 +89,7 @@ def test_list_employees_search_by_name(client):
     client.post("/api/employees", json=VALID_PAYLOAD)
     client.post("/api/employees", json={**VALID_PAYLOAD, "full_name": "Bob Jones", "email": "bob@company.com"})
 
-    res = client.get("/api/employees?search=Alice")
+    res = client.get("/api/employees?name=Alice")
     assert res.json()["data"]["total"] == 1
     assert res.json()["data"]["items"][0]["full_name"] == "Alice Smith"
 

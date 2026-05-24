@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, col, func, select
 
 from app.employees.schemas import EmployeeCreate
 from app.models import Employee
@@ -17,3 +17,25 @@ class EmployeeRepository:
 
     def get_by_email(self, email: str) -> Employee | None:
         return self.session.exec(select(Employee).where(Employee.email == email)).first()
+
+    def get_paginated(
+        self,
+        page: int,
+        page_size: int,
+        name: str | None = None,
+        country: str | None = None,
+    ) -> tuple[list[Employee], int]:
+        query = select(Employee)
+        count_query = select(func.count()).select_from(Employee)
+
+        if name:
+            query = query.where(col(Employee.full_name).contains(name))
+            count_query = count_query.where(col(Employee.full_name).contains(name))
+        if country:
+            query = query.where(func.lower(Employee.country) == func.lower(country))
+            count_query = count_query.where(func.lower(Employee.country) == func.lower(country))
+
+        total = self.session.exec(count_query).one()
+        offset = (page - 1) * page_size
+        items = list(self.session.exec(query.order_by(Employee.id).offset(offset).limit(page_size)).all())
+        return items, total

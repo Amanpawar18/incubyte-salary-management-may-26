@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from app.database import get_session
@@ -17,3 +17,15 @@ def get_service(session: Session = Depends(get_session)) -> EmployeeService:
 def create_employee(data: EmployeeCreate, service: EmployeeService = Depends(get_service)):
     employee = service.create(data)
     return {"data": employee.model_dump()}
+
+
+@router.get("")
+def list_employees(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    name: str | None = None,
+    country: str | None = None,
+    service: EmployeeService = Depends(get_service),
+):
+    result = service.list_paginated(page, page_size, name, country)
+    return {"data": result.model_dump()}
