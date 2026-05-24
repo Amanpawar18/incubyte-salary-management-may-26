@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { EmployeeDetail } from '@/components/employees/EmployeeDetail'
 import { EmployeeForm } from '@/components/employees/EmployeeForm'
 import { EmployeeTable } from '@/components/employees/EmployeeTable'
+import { MetricsPanel } from '@/components/employees/MetricsPanel'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { api, type Employee, type EmployeePage } from '@/lib/api'
+import { api, type Employee, type EmployeePage, type SalaryMetrics } from '@/lib/api'
 
 export default function App() {
   const [formOpen, setFormOpen] = useState(false)
@@ -17,6 +18,7 @@ export default function App() {
   const [name, setName] = useState('')
   const [country, setCountry] = useState('')
   const [data, setData] = useState<EmployeePage>({ items: [], total: 0, page: 1, page_size: 20 })
+  const [metrics, setMetrics] = useState<SalaryMetrics>({ total: 0, average_salary: 0, min_salary: null, max_salary: null, by_department: [], by_country: [] })
 
   const fetchEmployees = useCallback(
     () => api.employees.list({ page, page_size: 20, name, country }),
@@ -25,6 +27,7 @@ export default function App() {
 
   useEffect(() => {
     fetchEmployees().then(res => setData(res.data))
+    api.employees.metrics().then(res => setMetrics(res.data))
   }, [fetchEmployees])
 
   async function handleView(id: number) {
@@ -39,17 +42,22 @@ export default function App() {
     setPage(1)
   }
 
+  function refreshAll() {
+    fetchEmployees().then(res => setData(res.data))
+    api.employees.metrics().then(res => setMetrics(res.data))
+  }
+
   async function handleCreate(payload: Parameters<typeof api.employees.create>[0]) {
     await api.employees.create(payload)
     setFormOpen(false)
-    fetchEmployees().then(res => setData(res.data))
+    refreshAll()
   }
 
   async function handleDelete(id: number) {
     await api.employees.delete(id)
     setDetailOpen(false)
     setSelectedEmployee(null)
-    fetchEmployees().then(res => setData(res.data))
+    refreshAll()
   }
 
   function handleEditClick(employee: Employee) {
@@ -63,7 +71,7 @@ export default function App() {
     await api.employees.update(editingEmployee.id, payload)
     setFormOpen(false)
     setEditingEmployee(null)
-    fetchEmployees().then(res => setData(res.data))
+    refreshAll()
   }
 
   return (
@@ -72,39 +80,49 @@ export default function App() {
         <h1 className="text-xl font-semibold tracking-tight">Salary Management</h1>
       </header>
 
-      <main className="mx-auto max-w-6xl p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">Employees</h2>
-          <Button onClick={() => setFormOpen(true)}>+ Add Employee</Button>
-        </div>
+      <main className="w-full px-6 py-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          {/* Left — 30% metrics */}
+          <aside className="w-full lg:w-[30%] lg:shrink-0">
+            <MetricsPanel metrics={metrics} />
+          </aside>
 
-        <div className="flex gap-3">
-          <Input
-            placeholder="Search by name..."
-            className="max-w-xs"
-            value={nameInput}
-            onChange={e => setNameInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          />
-          <Input
-            placeholder="Filter by country..."
-            className="max-w-xs"
-            value={countryInput}
-            onChange={e => setCountryInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          />
-          <Button variant="outline" onClick={handleSearch}>Search</Button>
-        </div>
+          {/* Right — 70% employee CRUD */}
+          <section className="min-w-0 flex-1 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium">Employees</h2>
+              <Button onClick={() => setFormOpen(true)}>+ Add Employee</Button>
+            </div>
 
-        <div className="rounded-xl border bg-background shadow-sm">
-          <EmployeeTable
-            items={data.items}
-            total={data.total}
-            page={page}
-            pageSize={data.page_size}
-            onPageChange={setPage}
-            onView={handleView}
-          />
+            <div className="flex gap-3">
+              <Input
+                placeholder="Search by name..."
+                className="max-w-xs"
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+              <Input
+                placeholder="Filter by country..."
+                className="max-w-xs"
+                value={countryInput}
+                onChange={e => setCountryInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+              <Button variant="outline" onClick={handleSearch}>Search</Button>
+            </div>
+
+            <div className="rounded-xl border bg-background shadow-sm">
+              <EmployeeTable
+                items={data.items}
+                total={data.total}
+                page={page}
+                pageSize={data.page_size}
+                onPageChange={setPage}
+                onView={handleView}
+              />
+            </div>
+          </section>
         </div>
       </main>
 

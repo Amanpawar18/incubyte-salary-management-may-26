@@ -26,27 +26,27 @@ export function EmployeeTable({ items, total, page, pageSize, onPageChange, onVi
 
   return (
     <div className="space-y-3">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Job Title</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Country</TableHead>
-            <TableHead>Salary</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead />
+            <TableHead className="w-[14%]">Name</TableHead>
+            <TableHead className="w-[18%]">Job Title</TableHead>
+            <TableHead className="w-[14%]">Department</TableHead>
+            <TableHead className="w-[12%]">Country</TableHead>
+            <TableHead className="w-[10%]">Salary</TableHead>
+            <TableHead className="w-[24%]">Email</TableHead>
+            <TableHead className="w-[8%]" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((emp) => (
             <TableRow key={emp.id}>
-              <TableCell className="font-medium">{emp.full_name}</TableCell>
-              <TableCell>{emp.job_title}</TableCell>
-              <TableCell>{emp.department}</TableCell>
-              <TableCell>{emp.country}</TableCell>
+              <TableCell className="font-medium truncate max-w-0">{emp.full_name}</TableCell>
+              <TableCell className="truncate max-w-0">{emp.job_title}</TableCell>
+              <TableCell className="truncate max-w-0">{emp.department}</TableCell>
+              <TableCell className="truncate max-w-0">{emp.country}</TableCell>
               <TableCell>${emp.salary.toLocaleString()}</TableCell>
-              <TableCell>{emp.email}</TableCell>
+              <TableCell className="truncate max-w-0">{emp.email}</TableCell>
               <TableCell>
                 {onView && (
                   <Button variant="outline" size="sm" onClick={() => onView(emp.id)}>

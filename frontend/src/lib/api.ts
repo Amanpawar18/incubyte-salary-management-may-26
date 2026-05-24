@@ -28,6 +28,27 @@ export interface EmployeePage {
   page_size: number
 }
 
+export interface DepartmentMetrics {
+  department: string
+  count: number
+  average_salary: number
+}
+
+export interface CountryMetrics {
+  country: string
+  count: number
+  average_salary: number
+}
+
+export interface SalaryMetrics {
+  total: number
+  average_salary: number
+  min_salary: number | null
+  max_salary: number | null
+  by_department: DepartmentMetrics[]
+  by_country: CountryMetrics[]
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${url}`, {
     headers: { 'Content-Type': 'application/json' },
@@ -53,6 +74,8 @@ export const api = {
     },
     get: (id: number) =>
       request<{ data: Employee }>(`/api/employees/${id}`),
+    metrics: () =>
+      request<{ data: SalaryMetrics }>('/api/employees/metrics'),
     delete: (id: number) =>
       request<void>(`/api/employees/${id}`, { method: 'DELETE' }),
     update: (id: number, data: EmployeeFormData) =>
