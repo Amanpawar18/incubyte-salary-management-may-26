@@ -20,6 +20,12 @@ class EmployeeService:
             raise HTTPException(status_code=404, detail="Employee not found")
         return EmployeeRead.model_validate(employee)
 
+    def delete(self, employee_id: int) -> None:
+        employee = self.repo.get_by_id(employee_id)
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        self.repo.delete(employee)
+
     def update(self, employee_id: int, data: EmployeeCreate) -> EmployeeRead:
         employee = self.repo.get_by_id(employee_id)
         if not employee:

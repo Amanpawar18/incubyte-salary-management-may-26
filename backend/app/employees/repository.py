@@ -21,6 +21,10 @@ class EmployeeRepository:
     def get_by_id(self, employee_id: int) -> Employee | None:
         return self.session.get(Employee, employee_id)
 
+    def delete(self, employee: Employee) -> None:
+        self.session.delete(employee)
+        self.session.commit()
+
     def update(self, employee: Employee, data: EmployeeCreate) -> Employee:
         for field, value in data.model_dump().items():
             setattr(employee, field, value)

@@ -29,6 +29,11 @@ def update_employee(employee_id: int, data: EmployeeCreate, service: EmployeeSer
     return {"data": service.update(employee_id, data).model_dump()}
 
 
+@router.delete("/{employee_id}", status_code=204)
+def delete_employee(employee_id: int, service: EmployeeService = Depends(get_service)):
+    service.delete(employee_id)
+
+
 @router.get("")
 def list_employees(
     page: int = Query(1, ge=1),
