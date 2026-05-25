@@ -42,6 +42,13 @@ export interface CountryMetrics {
   max_salary: number
 }
 
+export interface JobTitleMetrics {
+  job_title: string
+  country: string
+  count: number
+  average_salary: number
+}
+
 export interface SalaryMetrics {
   total: number
   average_salary: number
@@ -78,6 +85,10 @@ export const api = {
       request<{ data: Employee }>(`/api/employees/${id}`),
     metrics: () =>
       request<{ data: SalaryMetrics }>('/api/employees/metrics'),
+    jobTitleMetrics: (params: { job_title: string; country: string }) => {
+      const query = new URLSearchParams({ job_title: params.job_title, country: params.country })
+      return request<{ data: JobTitleMetrics }>(`/api/employees/metrics/job-title?${query}`)
+    },
     delete: (id: number) =>
       request<void>(`/api/employees/${id}`, { method: 'DELETE' }),
     update: (id: number, data: EmployeeFormData) =>
