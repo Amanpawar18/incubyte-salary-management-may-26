@@ -13,8 +13,8 @@ const metrics: SalaryMetrics = {
     { department: 'Design', count: 2, average_salary: 75000 },
   ],
   by_country: [
-    { country: 'India', count: 3, average_salary: 80000 },
-    { country: 'Germany', count: 2, average_salary: 105000 },
+    { country: 'India', count: 3, average_salary: 80000, min_salary: 60000, max_salary: 100000 },
+    { country: 'Germany', count: 2, average_salary: 105000, min_salary: 90000, max_salary: 120000 },
   ],
 }
 
@@ -64,5 +64,11 @@ describe('MetricsPanel', () => {
   it('shows zero average when no employees', () => {
     render(<MetricsPanel metrics={emptyMetrics} />)
     expect(screen.getByText('$0')).toBeInTheDocument()
+  })
+
+  it('shows min and max salary in country breakdown', () => {
+    render(<MetricsPanel metrics={metrics} />)
+    expect(screen.getByText('$60k')).toBeInTheDocument()
+    expect(screen.getByText('$100k')).toBeInTheDocument()
   })
 })

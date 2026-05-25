@@ -38,6 +38,8 @@ export interface CountryMetrics {
   country: string
   count: number
   average_salary: number
+  min_salary: number
+  max_salary: number
 }
 
 export interface SalaryMetrics {
