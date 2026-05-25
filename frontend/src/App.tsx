@@ -4,6 +4,7 @@ import { EmployeeDetail } from '@/components/employees/EmployeeDetail'
 import { EmployeeForm } from '@/components/employees/EmployeeForm'
 import { EmployeeTable } from '@/components/employees/EmployeeTable'
 import { MetricsPanel } from '@/components/employees/MetricsPanel'
+import { SalaryLookup } from '@/components/employees/SalaryLookup'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { api, type Employee, type EmployeePage, type SalaryMetrics } from '@/lib/api'
@@ -108,7 +109,8 @@ export default function App() {
       <main className="w-full px-6 py-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/* Left — 30% metrics */}
-          <aside className="w-full lg:w-[30%] lg:shrink-0">
+          <aside className="w-full lg:w-[30%] lg:shrink-0 space-y-4">
+            <SalaryLookup />
             <MetricsPanel metrics={metrics} loading={loadingMetrics} />
           </aside>
 
