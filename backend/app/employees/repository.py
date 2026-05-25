@@ -1,6 +1,6 @@
 from sqlmodel import Session, col, func, select
 
-from app.employees.schemas import CountryMetrics, DepartmentMetrics, EmployeeCreate, SalaryMetrics
+from app.employees.schemas import CountryMetrics, DepartmentMetrics, EmployeeCreate, JobTitleMetrics, SalaryMetrics
 from app.models import Employee
 
 
@@ -73,6 +73,22 @@ class EmployeeRepository:
                 )
                 for c, n, a, mn, mx in by_country
             ],
+        )
+
+    def get_job_title_metrics(self, job_title: str, country: str) -> JobTitleMetrics | None:
+        result = self.session.exec(
+            select(func.count(), func.avg(Employee.salary))
+            .where(func.lower(Employee.job_title) == func.lower(job_title))
+            .where(func.lower(Employee.country) == func.lower(country))
+        ).one()
+        count, avg = result
+        if count == 0:
+            return None
+        return JobTitleMetrics(
+            job_title=job_title,
+            country=country,
+            count=count,
+            average_salary=round(avg, 2),
         )
 
     def get_paginated(

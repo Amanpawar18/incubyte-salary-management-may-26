@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from app.employees.repository import EmployeeRepository
-from app.employees.schemas import EmployeeCreate, EmployeePage, EmployeeRead, SalaryMetrics
+from app.employees.schemas import EmployeeCreate, EmployeePage, EmployeeRead, JobTitleMetrics, SalaryMetrics
 
 
 class EmployeeService:
@@ -22,6 +22,12 @@ class EmployeeService:
 
     def get_metrics(self) -> SalaryMetrics:
         return self.repo.get_metrics()
+
+    def get_job_title_metrics(self, job_title: str, country: str) -> JobTitleMetrics:
+        result = self.repo.get_job_title_metrics(job_title, country)
+        if not result:
+            raise HTTPException(status_code=404, detail="No employees found for this job title and country")
+        return result
 
     def delete(self, employee_id: int) -> None:
         employee = self.repo.get_by_id(employee_id)

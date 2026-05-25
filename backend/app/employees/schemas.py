@@ -59,6 +59,13 @@ class EmployeePage(BaseModel):
     page_size: int
 
 
+class JobTitleMetrics(BaseModel):
+    job_title: str
+    country: str
+    count: int
+    average_salary: float
+
+
 class DepartmentMetrics(BaseModel):
     department: str
     count: int

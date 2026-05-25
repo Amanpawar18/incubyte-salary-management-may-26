@@ -24,6 +24,15 @@ def get_metrics(service: EmployeeService = Depends(get_service)):
     return {"data": service.get_metrics().model_dump()}
 
 
+@router.get("/metrics/job-title")
+def get_job_title_metrics(
+    job_title: str,
+    country: str,
+    service: EmployeeService = Depends(get_service),
+):
+    return {"data": service.get_job_title_metrics(job_title, country).model_dump()}
+
+
 @router.get("/{employee_id}")
 def get_employee(employee_id: int, service: EmployeeService = Depends(get_service)):
     return {"data": service.get_by_id(employee_id).model_dump()}
