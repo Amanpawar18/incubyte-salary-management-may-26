@@ -69,6 +69,8 @@ class CountryMetrics(BaseModel):
     country: str
     count: int
     average_salary: float
+    min_salary: float
+    max_salary: float
 
 
 class SalaryMetrics(BaseModel):

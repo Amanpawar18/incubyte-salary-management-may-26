@@ -46,7 +46,13 @@ class EmployeeRepository:
         ).all()
 
         by_country = self.session.exec(
-            select(Employee.country, func.count(), func.avg(Employee.salary))
+            select(
+                Employee.country,
+                func.count(),
+                func.avg(Employee.salary),
+                func.min(Employee.salary),
+                func.max(Employee.salary),
+            )
             .group_by(Employee.country)
             .order_by(Employee.country)
         ).all()
@@ -57,7 +63,16 @@ class EmployeeRepository:
             min_salary=min_sal,
             max_salary=max_sal,
             by_department=[DepartmentMetrics(department=d, count=c, average_salary=round(a, 2)) for d, c, a in by_dept],
-            by_country=[CountryMetrics(country=c, count=n, average_salary=round(a, 2)) for c, n, a in by_country],
+            by_country=[
+                CountryMetrics(
+                    country=c,
+                    count=n,
+                    average_salary=round(a, 2),
+                    min_salary=mn,
+                    max_salary=mx,
+                )
+                for c, n, a, mn, mx in by_country
+            ],
         )
 
     def get_paginated(
