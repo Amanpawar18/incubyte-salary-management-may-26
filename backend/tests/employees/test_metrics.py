@@ -73,6 +73,53 @@ def test_metrics_by_department_multiple_employees(client):
     assert by_dept["Design"]["count"] == 1
 
 
+# ── GET /api/employees/metrics/job-title ──────────────────────────────────────
+
+def test_job_title_metrics_returns_200(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)
+    res = client.get("/api/employees/metrics/job-title?job_title=Software Engineer&country=India")
+    assert res.status_code == 200
+
+
+def test_job_title_metrics_returns_count_and_average(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)                                                    # 80_000
+    client.post("/api/employees", json={**VALID_PAYLOAD, "email": "bob@company.com", "salary": 100000}) # 100_000
+
+    body = client.get("/api/employees/metrics/job-title?job_title=Software Engineer&country=India").json()["data"]
+    assert body["job_title"] == "Software Engineer"
+    assert body["country"] == "India"
+    assert body["count"] == 2
+    assert body["average_salary"] == 90000
+
+
+def test_job_title_metrics_returns_404_when_no_match(client):
+    res = client.get("/api/employees/metrics/job-title?job_title=CEO&country=Mars")
+    assert res.status_code == 404
+
+
+def test_job_title_metrics_is_case_insensitive(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)
+    res = client.get("/api/employees/metrics/job-title?job_title=software engineer&country=india")
+    assert res.status_code == 200
+    assert res.json()["data"]["count"] == 1
+
+
+def test_job_title_metrics_excludes_other_countries(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)                                                             # India
+    client.post("/api/employees", json={**VALID_PAYLOAD, "email": "bob@company.com", "country": "Germany"})      # Germany — same job title
+
+    body = client.get("/api/employees/metrics/job-title?job_title=Software Engineer&country=India").json()["data"]
+    assert body["count"] == 1  # only the India employee
+
+
+def test_job_title_metrics_excludes_other_job_titles(client):
+    client.post("/api/employees", json=VALID_PAYLOAD)                                                             # Software Engineer
+    client.post("/api/employees", json={**VALID_PAYLOAD, "email": "bob@company.com", "job_title": "Designer"})   # different title
+
+    body = client.get("/api/employees/metrics/job-title?job_title=Software Engineer&country=India").json()["data"]
+    assert body["count"] == 1  # only the Software Engineer
+
+
 def test_metrics_by_country_includes_min_and_max_salary(client):
     client.post("/api/employees", json=VALID_PAYLOAD)                                                        # India, 80_000
     client.post("/api/employees", json={**VALID_PAYLOAD, "email": "bob@company.com", "salary": 120000})      # India, 120_000
