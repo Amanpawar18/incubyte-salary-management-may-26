@@ -68,7 +68,9 @@ describe('MetricsPanel', () => {
 
   it('shows min and max salary in country breakdown', () => {
     render(<MetricsPanel metrics={metrics} />)
-    expect(screen.getByText('$60k')).toBeInTheDocument()
-    expect(screen.getByText('$100k')).toBeInTheDocument()
+    expect(screen.getByText('$60k')).toBeInTheDocument()   // India min — unique
+    expect(screen.getAllByText('$100k').length).toBeGreaterThanOrEqual(1) // India max (also Engineering avg)
+    expect(screen.getByText('$90k')).toBeInTheDocument()   // Germany min — unique
+    expect(screen.getByText('$120k')).toBeInTheDocument()  // Germany max — unique
   })
 })

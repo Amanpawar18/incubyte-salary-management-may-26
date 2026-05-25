@@ -1,6 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import type { SalaryMetrics } from '@/lib/api'
 
+function fmtK(value: number): string {
+  return `$${Math.round(value / 1000)}k`
+}
+
 interface Props {
   metrics: SalaryMetrics
   loading?: boolean
@@ -57,7 +61,13 @@ export function MetricsPanel({ metrics, loading }: Props) {
       {metrics.by_country.length > 0 && (
         <BreakdownTable
           title="By Country"
-          rows={metrics.by_country.map(c => ({ label: c.country, count: c.count, average_salary: c.average_salary }))}
+          rows={metrics.by_country.map(c => ({
+            label: c.country,
+            count: c.count,
+            average_salary: c.average_salary,
+            min_salary: c.min_salary,
+            max_salary: c.max_salary,
+          }))}
         />
       )}
     </div>
@@ -73,24 +83,41 @@ function StatCard({ label, value }: { label: string; value: string }) {
   )
 }
 
-function BreakdownTable({ title, rows }: { title: string; rows: { label: string; count: number; average_salary: number }[] }) {
+interface BreakdownRow {
+  label: string
+  count: number
+  average_salary: number
+  min_salary?: number
+  max_salary?: number
+}
+
+function BreakdownTable({ title, rows }: { title: string; rows: BreakdownRow[] }) {
+  const hasRange = rows.some(r => r.min_salary !== undefined)
   return (
     <div className="rounded-xl border bg-background shadow-sm">
       <p className="border-b px-4 py-2 text-sm font-medium">{title}</p>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left text-xs text-muted-foreground">
-            <th className="px-4 py-2 font-medium">Name</th>
-            <th className="px-4 py-2 font-medium">Count</th>
-            <th className="px-4 py-2 font-medium">Avg Salary</th>
+            <th className="px-3 py-2 font-medium">Name</th>
+            <th className="px-3 py-2 font-medium">#</th>
+            {hasRange && <th className="px-3 py-2 font-medium">Min</th>}
+            <th className="px-3 py-2 font-medium">Avg</th>
+            {hasRange && <th className="px-3 py-2 font-medium">Max</th>}
           </tr>
         </thead>
         <tbody>
           {rows.map(row => (
             <tr key={row.label} className="border-b last:border-0">
-              <td className="px-4 py-2">{row.label}</td>
-              <td className="px-4 py-2">{row.count}</td>
-              <td className="px-4 py-2">{fmt(row.average_salary)}</td>
+              <td className="px-3 py-2 truncate">{row.label}</td>
+              <td className="px-3 py-2">{row.count}</td>
+              {hasRange && (
+                <td className="px-3 py-2">{row.min_salary !== undefined ? fmtK(row.min_salary) : '—'}</td>
+              )}
+              <td className="px-3 py-2">{fmtK(row.average_salary)}</td>
+              {hasRange && (
+                <td className="px-3 py-2">{row.max_salary !== undefined ? fmtK(row.max_salary) : '—'}</td>
+              )}
             </tr>
           ))}
         </tbody>
